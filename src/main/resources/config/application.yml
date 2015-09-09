@@ -29,7 +29,7 @@ spring:
 #       properties.*:
         open-in-view: true
         show-sql: true
-#       database-platform:
+        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
 #       database:
         generate-ddl: true # ignored by Hibernate, might be useful for other vendors
         hibernate:
@@ -51,7 +51,7 @@ spring:
         url: jdbc:mysql://mysql/monitor
         username: root
         password: sa
-        jndi-name:
+#       jndi-name:
         max-active: 100
         max-idle: 8
         min-idle: 8

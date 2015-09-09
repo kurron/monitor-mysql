@@ -21,6 +21,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST
 import groovy.json.JsonSlurper
 import org.kurron.example.rest.ApplicationProperties
 import org.kurron.example.rest.feedback.ExampleFeedbackContext
+import org.kurron.example.rest.outbound.Stuff
+import org.kurron.example.rest.outbound.StuffRepository
 import org.kurron.feedback.AbstractFeedbackAware
 import org.kurron.stereotype.InboundRestGateway
 import org.springframework.amqp.core.Message
@@ -58,13 +60,17 @@ class RestInboundGateway extends AbstractFeedbackAware {
      **/
     private final RabbitOperations template
 
+    private final StuffRepository theRepository
+
     @Autowired
     RestInboundGateway( final ApplicationProperties aConfiguration,
                         final CounterService aCounterService,
+                        final StuffRepository aRepository,
                         final RabbitOperations aTemplate ) {
         configuration = aConfiguration
         counterService = aCounterService
         template = aTemplate
+        theRepository = aRepository
     }
 
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
@@ -85,8 +91,8 @@ class RestInboundGateway extends AbstractFeedbackAware {
         }
         Thread.sleep( delay )
 
-        def generatedId = UUID.randomUUID().toString()
-        feedbackProvider.sendFeedback( ExampleFeedbackContext.DATA_STORED, generatedId )
+        def saved = theRepository.save( new Stuff( command: command ) )
+        feedbackProvider.sendFeedback( ExampleFeedbackContext.DATA_STORED, saved.id )
 
         def message = newMessage( command )
         template.send( message )
