@@ -19,7 +19,6 @@ import static java.nio.charset.StandardCharsets.UTF_8
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 import groovy.json.JsonSlurper
-import java.util.concurrent.TimeUnit
 import org.kurron.example.rest.ApplicationProperties
 import org.kurron.example.rest.feedback.ExampleFeedbackContext
 import org.kurron.feedback.AbstractFeedbackAware
@@ -32,7 +31,6 @@ import org.springframework.amqp.core.MessagePropertiesBuilder
 import org.springframework.amqp.rabbit.core.RabbitOperations
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.metrics.CounterService
-import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
@@ -60,20 +58,13 @@ class RestInboundGateway extends AbstractFeedbackAware {
      **/
     private final RabbitOperations template
 
-    /**
-     * Manages interactions with the Redis database.
-     **/
-    private final StringRedisTemplate theRedisTemplate
-
     @Autowired
     RestInboundGateway( final ApplicationProperties aConfiguration,
                         final CounterService aCounterService,
-                        final StringRedisTemplate redisTemplate,
                         final RabbitOperations aTemplate ) {
         configuration = aConfiguration
         counterService = aCounterService
         template = aTemplate
-        theRedisTemplate = redisTemplate
     }
 
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
@@ -96,8 +87,6 @@ class RestInboundGateway extends AbstractFeedbackAware {
 
         def generatedId = UUID.randomUUID().toString()
         feedbackProvider.sendFeedback( ExampleFeedbackContext.DATA_STORED, generatedId )
-        theRedisTemplate.opsForHash().putAll( generatedId, ['command': command] )
-        theRedisTemplate.expire( generatedId, 60L, TimeUnit.SECONDS )
 
         def message = newMessage( command )
         template.send( message )
@@ -106,7 +95,7 @@ class RestInboundGateway extends AbstractFeedbackAware {
     }
 
     private static MessageProperties newProperties() {
-        MessagePropertiesBuilder.newInstance().setAppId( 'monitor-redis' )
+        MessagePropertiesBuilder.newInstance().setAppId( 'monitor-mysql' )
                                               .setContentType( 'application/json' )
                                               .setMessageId( UUID.randomUUID().toString() )
                                               .setDeliveryMode( MessageDeliveryMode.NON_PERSISTENT )
