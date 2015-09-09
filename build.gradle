@@ -44,6 +44,8 @@ dependencies {
     compile "org.codehaus.groovy:groovy-all:${groovyVersion}:indy"
     compile "org.codehaus.gpars:gpars:${gparsVersion}"
     compile "org.kurron:tools-groovy:${toolsGroovyVersion}"
+
+    runtime "mysql:mysql-connector-java:${mySqlDriverVersion}"
 }
 
 defaultTasks << 'clean'
