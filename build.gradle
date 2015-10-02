@@ -51,6 +51,7 @@ dependencies {
     compile "org.kurron:tools-groovy:${toolsGroovyVersion}"
 
     runtime "mysql:mysql-connector-java:${mySqlDriverVersion}"
+    runtime "net.logstash.logback:logstash-logback-encoder:${logstashLogbackVersion}"
 }
 
 defaultTasks << 'clean'
